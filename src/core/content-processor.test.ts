@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { ContentProcessor } from "./content-processor";
 import type { FileContent } from "../types";
 import { ParseError } from "../utils/errors";

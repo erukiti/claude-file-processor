@@ -39,12 +39,12 @@ export class FileProcessor {
       for (const file of files) {
         const fullPath = resolve(this.options.outputDir, file.path);
         await checkPathSecurity(fullPath, this.options.outputDir);
-        
+
         debugLog(`Writing file: ${fullPath}`, {
           module: "FileProcessor",
           function: "extract",
         });
-        
+
         await writeFileContent(fullPath, file.content);
         info(`Extracted: ${file.path}`, {
           module: "FileProcessor",
@@ -62,7 +62,8 @@ export class FileProcessor {
    * @returns パックされたファイルの文字列
    */
   public async pack(directory: string): Promise<string> {
-    if (!this.options.inputDir) {
+    const { inputDir } = this.options;
+    if (!inputDir) {
       throw new ValidationError("Input directory must be specified");
     }
 
@@ -80,20 +81,20 @@ export class FileProcessor {
       paths
         .filter((path) => this.contentProcessor.isTargetFile(path))
         .map(async (path) => {
-          const fullPath = resolve(this.options.inputDir!, path);
-          await checkPathSecurity(fullPath, this.options.inputDir!);
-          
+          const fullPath = resolve(inputDir, path);
+          await checkPathSecurity(fullPath, inputDir);
+
           debugLog(`Reading file: ${fullPath}`, {
             module: "FileProcessor",
             function: "pack",
           });
-          
+
           const content = await readFileContent(fullPath);
           info(`Packed: ${path}`, {
             module: "FileProcessor",
             function: "pack",
           });
-          
+
           return { path, content };
         })
     );

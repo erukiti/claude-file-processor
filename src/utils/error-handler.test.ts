@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { handleError } from "./error-handler";
 import { AppError, ValidationError, SecurityError } from "./errors";
 import * as logger from "./logger";
@@ -46,8 +46,8 @@ describe("error-handler", () => {
   it("should include log context", () => {
     const error = new SecurityError("Security violation");
     const context = { module: "test", function: "testFunc" };
-    
-    handleError(error, { 
+
+    handleError(error, {
       exitOnError: false,
       logContext: context
     });

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
 import { FileProcessor } from "./file-processor";
 import { ContentProcessor } from "./content-processor";
 import type { ProcessOptions, FileContent } from "../types";
@@ -8,7 +8,6 @@ import { checkPathSecurity } from "../utils/security";
 import { globby } from "globby";
 import clipboard from "clipboardy";
 import * as logger from "../utils/logger";
-import { resolve } from "node:path";
 
 // モックのセットアップ
 vi.mock("../utils/file", () => ({
@@ -57,7 +56,7 @@ describe("FileProcessor", () => {
         { path: "file2.ts", content: "content2" },
       ];
 
-      (contentProcessor.parse as any).mockReturnValue(mockFiles);
+      (contentProcessor.parse as Mock).mockReturnValue(mockFiles);
 
       const result = await processor.extract("test content");
 
@@ -72,7 +71,7 @@ describe("FileProcessor", () => {
         { ...defaultOptions, dryRun: true }
       );
       const mockFiles = [{ path: "file1.ts", content: "content1" }];
-      (contentProcessor.parse as any).mockReturnValue(mockFiles);
+      (contentProcessor.parse as Mock).mockReturnValue(mockFiles);
 
       await processor.extract("test content");
 
@@ -82,8 +81,8 @@ describe("FileProcessor", () => {
     it("should handle security check failures", async () => {
       const processor = new FileProcessor(contentProcessor, defaultOptions);
       const mockFiles = [{ path: "../file1.ts", content: "content1" }];
-      (contentProcessor.parse as any).mockReturnValue(mockFiles);
-      (checkPathSecurity as any).mockRejectedValueOnce(
+      (contentProcessor.parse as Mock).mockReturnValue(mockFiles);
+      (checkPathSecurity as Mock).mockRejectedValueOnce(
         new SecurityError("Security violation")
       );
 
@@ -106,11 +105,11 @@ describe("FileProcessor", () => {
 
   describe("pack", () => {
     beforeEach(() => {
-      (globby as any).mockResolvedValue(["file1.ts", "file2.ts"]);
-      (readFileContent as any).mockResolvedValue("test content");
-      (contentProcessor.isTargetFile as any).mockReturnValue(true);
-      (contentProcessor.format as any).mockReturnValue("formatted content");
-      (checkPathSecurity as any).mockResolvedValue({ isValid: true });
+      (globby as Mock).mockResolvedValue(["file1.ts", "file2.ts"]);
+      (readFileContent as Mock).mockResolvedValue("test content");
+      (contentProcessor.isTargetFile as Mock).mockReturnValue(true);
+      (contentProcessor.format as Mock).mockReturnValue("formatted content");
+      (checkPathSecurity as Mock).mockResolvedValue({ isValid: true });
     });
 
     it("should pack files correctly", async () => {
@@ -145,7 +144,7 @@ describe("FileProcessor", () => {
 
     it("should handle security check failures", async () => {
       const processor = new FileProcessor(contentProcessor, defaultOptions);
-      (checkPathSecurity as any)
+      (checkPathSecurity as Mock)
         .mockReset()
         .mockRejectedValueOnce(new SecurityError("Security violation"));
 
@@ -154,7 +153,7 @@ describe("FileProcessor", () => {
 
     it("should filter files based on ContentProcessor", async () => {
       const processor = new FileProcessor(contentProcessor, defaultOptions);
-      (contentProcessor.isTargetFile as any)
+      (contentProcessor.isTargetFile as Mock)
         .mockReturnValueOnce(true)
         .mockReturnValueOnce(false);
 

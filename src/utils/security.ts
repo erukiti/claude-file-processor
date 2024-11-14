@@ -1,4 +1,4 @@
-import { resolve, normalize, isAbsolute, relative } from "node:path";
+import { resolve, normalize, relative } from "node:path";
 import { lstat } from "node:fs/promises";
 import { SecurityError } from "./errors";
 import { debugLog } from "./debug";
