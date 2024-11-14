@@ -1,22 +1,21 @@
-import { Command } from 'commander';
-import { extract, pack } from './core/processor';
-import clipboard from 'clipboardy';
-import { debugLog } from './utils/debug';
-import type { ProcessOptions } from './types';
-import { dirname } from 'node:path';
-import { mkdir } from 'node:fs/promises';
-import { AppError } from './utils/errors';
+import { Command } from "commander";
+import { extract, pack } from "./core/processor";
+import clipboard from "clipboardy";
+import { debugLog } from "./utils/debug";
+import type { ProcessOptions } from "./types";
+import { mkdir } from "node:fs/promises";
+import { AppError } from "./utils/errors";
 
 const program = new Command();
 
 program
-  .version('1.0.0')
-  .option('-d, --dry-run', 'Perform a dry run')
-  .option('-c, --clipboard', 'Use clipboard for input/output');
+  .version("1.0.0")
+  .option("-d, --dry-run", "Perform a dry run")
+  .option("-c, --clipboard", "Use clipboard for input/output");
 
 program
-  .command('extract <outputDir>')
-  .description('Extract files to specified directory')
+  .command("extract <outputDir>")
+  .description("Extract files to specified directory")
   .action(async (outputDir: string) => {
     try {
       const options: ProcessOptions = {
@@ -32,12 +31,12 @@ program
 
       let content: string;
       if (options.useClipboard) {
-        debugLog('Reading from clipboard');
+        debugLog("Reading from clipboard");
         content = await clipboard.read();
       } else {
-        debugLog('Reading from stdin');
-        content = '';
-        process.stdin.setEncoding('utf-8');
+        debugLog("Reading from stdin");
+        content = "";
+        process.stdin.setEncoding("utf-8");
         for await (const chunk of process.stdin) {
           content += chunk;
         }
@@ -50,18 +49,18 @@ program
         console.error(`Error: ${error.message}`);
         process.exit(1);
       } else if (error instanceof Error) {
-        console.error('Unexpected error:', error.message);
+        console.error("Unexpected error:", error.message);
         process.exit(1);
       } else {
-        console.error('Unknown error occurred');
+        console.error("Unknown error occurred");
         process.exit(1);
       }
     }
   });
 
 program
-  .command('pack <inputDir>')
-  .description('Pack files from input directory')
+  .command("pack <inputDir>")
+  .description("Pack files from input directory")
   .action(async (inputDir: string) => {
     try {
       const options: ProcessOptions = {
@@ -74,17 +73,17 @@ program
       if (!options.useClipboard) {
         console.log(result);
       } else {
-        console.log('Content has been copied to clipboard');
+        console.log("Content has been copied to clipboard");
       }
     } catch (error) {
       if (error instanceof AppError) {
         console.error(`Error: ${error.message}`);
         process.exit(1);
       } else if (error instanceof Error) {
-        console.error('Unexpected error:', error.message);
+        console.error("Unexpected error:", error.message);
         process.exit(1);
       } else {
-        console.error('Unknown error occurred');
+        console.error("Unknown error occurred");
         process.exit(1);
       }
     }

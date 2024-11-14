@@ -3,5 +3,7 @@
  * @param message - 出力するメッセージ
  */
 export const debugLog = (message: string): void => {
-  console.log(`[DEBUG] ${message}`);
+  if (process.env.DEBUG === "1") {
+    console.log(`[DEBUG] ${message}`);
+  }
 };

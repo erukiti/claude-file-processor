@@ -1,14 +1,15 @@
-import type { FileContent } from '../types';
-import { debugLog } from './debug';
-import { isFilePath, extractPathFromLine } from './path';
+import type { FileContent } from "../types";
+import { debugLog } from "./debug";
+import { isFilePath, extractPathFromLine, toRelativePath } from "./path";
 
 /**
- * 文字列の前後の空行を削除する
+ * 文字列の前後の空行を削除する（末尾の改行は保持）
  * @param str - 処理する文字列
- * @returns トリムされた文字列
+ * @returns トリムされた文字列（末尾に必ず1つの改行を含む）
  */
 export const trimEmptyLines = (str: string): string => {
-  return str.replace(/^\n+|\n+$/g, '');
+  // 前後の改行を全て削除し、末尾に必ず1つの改行を追加
+  return `${str.replace(/^\n+/, "").replace(/\n+$/, "")}\n`;
 };
 
 /**
@@ -18,7 +19,7 @@ export const trimEmptyLines = (str: string): string => {
  */
 export const parseContent = (content: string): FileContent[] => {
   const files: FileContent[] = [];
-  const lines = content.split('\n');
+  const lines = content.split("\n");
   let currentPath: string | null = null;
   let currentContent: string[] = [];
 
@@ -27,7 +28,7 @@ export const parseContent = (content: string): FileContent[] => {
       if (currentPath && currentContent.length > 0) {
         files.push({
           path: currentPath,
-          content: trimEmptyLines(currentContent.join('\n')),
+          content: trimEmptyLines(currentContent.join("\n")),
         });
         currentContent = [];
       }
@@ -40,7 +41,7 @@ export const parseContent = (content: string): FileContent[] => {
   if (currentPath && currentContent.length > 0) {
     files.push({
       path: currentPath,
-      content: trimEmptyLines(currentContent.join('\n')),
+      content: trimEmptyLines(currentContent.join("\n")),
     });
   }
 
@@ -50,8 +51,18 @@ export const parseContent = (content: string): FileContent[] => {
 /**
  * ファイル内容の配列をテキストに変換する
  * @param files - ファイル内容の配列
- * @returns 変換されたテキスト
+ * @returns 変換されたテキスト（末尾に必ず1つの改行を含む）
  */
 export const formatContent = (files: FileContent[]): string => {
-  return files.map(file => `// ${file.path}\n\n${trimEmptyLines(file.content)}`).join('\n\n');
+  if (files.length === 0) return "\n";
+
+  const formattedContent = files.map((file) => {
+    const path = toRelativePath(file.path);
+    const content = trimEmptyLines(file.content);
+    // contentはすでに末尾の改行を含んでいる
+    return `// ${path}\n\n${content}`;
+  });
+
+  // 各ファイルの内容を2つの改行で区切り、最後に改行を1つ追加
+  return `${formattedContent.join("\n")}\n`;
 };

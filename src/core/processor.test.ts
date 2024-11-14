@@ -45,30 +45,30 @@ describe("processor", () => {
 
     it("should extract files correctly", async () => {
       const input =
-        '// file1.ts\nconsole.log("test");\n\n// file2.ts\nconsole.log("test2");';
+        "// ./file1.ts\nconsole.log(\"test\");\n\n// ./file2.ts\nconsole.log(\"test2\");\n";
 
       const files = await extract(input, { ...mockOptions, dryRun: true });
 
       expect(files).toHaveLength(2);
       expect(files[0].path).toBe("file1.ts");
-      expect(files[0].content).toBe('console.log("test");');
+      expect(files[0].content).toBe('console.log("test");\n');
       expect(files[1].path).toBe("file2.ts");
-      expect(files[1].content).toBe('console.log("test2");');
+      expect(files[1].content).toBe('console.log("test2");\n');
     });
 
     it("should write files when not in dry-run mode", async () => {
-      const input = '// file1.ts\nconsole.log("test");';
+      const input = "// ./file1.ts\nconsole.log(\"test\");\n";
 
       await extract(input, mockOptions);
 
       expect(writeFileContent).toHaveBeenCalledWith(
         resolve(TEST_OUTPUT_DIR, "file1.ts"),
-        'console.log("test");',
+        'console.log("test");\n',
       );
     });
 
     it("should throw ValidationError when outputDir is not specified", async () => {
-      const input = '// file1.ts\nconsole.log("test");';
+      const input = "// ./file1.ts\nconsole.log(\"test\");\n";
 
       const options: ProcessOptions = {
         dryRun: false,
@@ -97,17 +97,17 @@ describe("processor", () => {
         "file2.ts",
       ]);
       (readFileContent as unknown as ReturnType<typeof vi.fn>)
-        .mockResolvedValueOnce("content1")
-        .mockResolvedValueOnce("content2");
+        .mockResolvedValueOnce("content1\n")
+        .mockResolvedValueOnce("content2\n");
     });
 
     it("should pack files correctly", async () => {
       const result = await pack(TEST_INPUT_DIR, mockOptions);
 
-      expect(result).toContain("// file1.ts");
-      expect(result).toContain("content1");
-      expect(result).toContain("// file2.ts");
-      expect(result).toContain("content2");
+      expect(result).toContain("// ./file1.ts");
+      expect(result).toContain("content1\n");
+      expect(result).toContain("// ./file2.ts");
+      expect(result).toContain("content2\n");
     });
 
     it("should copy to clipboard when useClipboard is true", async () => {

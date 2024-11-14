@@ -4,7 +4,7 @@
 export class AppError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'AppError';
+    this.name = "AppError";
   }
 }
 
@@ -12,9 +12,12 @@ export class AppError extends Error {
  * ファイル操作に関するエラークラス
  */
 export class FileOperationError extends AppError {
-  constructor(message: string, public readonly path: string) {
+  constructor(
+    message: string,
+    public readonly path: string,
+  ) {
     super(`File operation failed at ${path}: ${message}`);
-    this.name = 'FileOperationError';
+    this.name = "FileOperationError";
   }
 }
 
@@ -24,6 +27,6 @@ export class FileOperationError extends AppError {
 export class ValidationError extends AppError {
   constructor(message: string) {
     super(message);
-    this.name = 'ValidationError';
+    this.name = "ValidationError";
   }
 }
