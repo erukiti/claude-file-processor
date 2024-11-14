@@ -27,6 +27,7 @@ describe("debug utils", () => {
   });
 
   it("should not output debug message when DEBUG is not set", () => {
+    // biome-ignore lint/performance/noDelete: <explanation>
     delete process.env.DEBUG;
     const testMessage = "test message";
 
