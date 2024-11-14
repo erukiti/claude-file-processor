@@ -4,7 +4,7 @@ import clipboard from "clipboardy";
 import { debugLog } from "./utils/debug";
 import type { ProcessOptions } from "./types";
 import { mkdir } from "node:fs/promises";
-import { AppError } from "./utils/errors";
+import { handleError } from "./utils/error-handler";
 
 const program = new Command()
   .name("cfp")
@@ -26,7 +26,6 @@ program
         outputDir,
       };
 
-      // 出力先ディレクトリの作成
       if (!options.dryRun) {
         await mkdir(outputDir, { recursive: true });
       }
@@ -47,16 +46,12 @@ program
       const files = await extract(content, options);
       console.log(`Processed ${files.length} files to ${outputDir}`);
     } catch (error) {
-      if (error instanceof AppError) {
-        console.error(`Error: ${error.message}`);
-        process.exit(1);
-      } else if (error instanceof Error) {
-        console.error("Unexpected error:", error.message);
-        process.exit(1);
-      } else {
-        console.error("Unknown error occurred");
-        process.exit(1);
-      }
+      handleError(error, {
+        logContext: {
+          module: "cli",
+          function: "extract",
+        },
+      });
     }
   });
 
@@ -78,16 +73,12 @@ program
         console.log("Content has been copied to clipboard");
       }
     } catch (error) {
-      if (error instanceof AppError) {
-        console.error(`Error: ${error.message}`);
-        process.exit(1);
-      } else if (error instanceof Error) {
-        console.error("Unexpected error:", error.message);
-        process.exit(1);
-      } else {
-        console.error("Unknown error occurred");
-        process.exit(1);
-      }
+      handleError(error, {
+        logContext: {
+          module: "cli",
+          function: "pack",
+        },
+      });
     }
   });
 
