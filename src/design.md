@@ -1,172 +1,66 @@
-# 設計ドキュメント
+# ファイルプロセッサの設計ドキュメント
 
 ## 概要
-このツールは、複数のTypeScriptやJavaScriptファイルを特定のフォーマットで結合・展開するためのCLIツールです。
+このツールは、ChatGPTやClaude等のAIサービスで生成されたコードファイルを処理するためのユーティリティです。
+特定のフォーマットで結合されたファイルを個別のファイルに展開する機能と、複数のファイルを特定のフォーマットに結合する機能を提供します。
 
 ## アーキテクチャ
-### レイヤー構造
-1. CLIレイヤー (cli.ts)
-   - コマンドライン引数の解析
-   - 入出力の制御
-2. コアレイヤー (core/processor.ts)
-   - ファイル処理のメインロジック
-3. ユーティリティレイヤー (utils/*)
-   - 共通機能の提供
 
-### セキュリティ
-1. パスの検証
-   - ディレクトリトラバーサル攻撃の防止
-     - パスの正規化
-     - 親ディレクトリへの移動（../）の検出と防止
-   - シンボリックリンクの検出と適切な処理
-     - リンクの解決とループの防止
-     - 最大解決深度の設定
+### コアモジュール
+- `processor.ts`: ファイルの展開・結合の主要なロジックを提供
+- `processor-utils.ts`: パース処理や文字列フォーマット処理のユーティリティ
 
-2. 入力検証
-   - ファイルパスのサニタイズ
-   - 不正な文字の検出
-   - パス長の制限
+### ユーティリティモジュール
+- `debug.ts`: デバッグログ出力機能
+- `errors.ts`: エラー型の定義
+- `file.ts`: ファイル操作のラッパー
+- `logger.ts`: ログ出力機能
+- `path.ts`: パス操作のユーティリティ
+- `security.ts`: セキュリティチェック機能
 
-### エラー処理
-1. エラー種別の拡張
-   - ParseError: パース関連のエラー
-     - 行番号情報
-     - コンテキスト情報
-   - SecurityError: セキュリティ関連のエラー
-     - 不正なパスの検出
-     - 権限の問題
-   - ValidationError: 入力検証エラー
-   - FileOperationError: ファイル操作エラー
+### CLI
+- `cli.ts`: コマンドラインインターフェース
+- `types.ts`: 共通の型定義
 
-2. エラーコンテキスト
-   - 発生場所（ファイル名、行番号）
-   - エラーの詳細情報
-   - 推奨される対処方法
+## セキュリティ考慮事項
+1. ディレクトリトラバーサル攻撃の防止
+   - 入力されたパスが指定されたディレクトリの外部にアクセスしないようチェック
+2. シンボリックリンク制限
+   - デフォルトでシンボリックリンクを無効化
+3. パス検証
+   - ファイルパスのフォーマットを厳密にチェック
 
-### ロギング
-1. ログレベル
-   - ERROR: エラー情報
-   - WARN: 警告情報
-   - INFO: 一般的な情報
-   - DEBUG: デバッグ情報
-   - TRACE: 詳細なトレース情報
+## エラーハンドリング
+階層化されたエラークラスを使用し、適切なエラーメッセージとコンテキスト情報を提供:
+- AppError: 基本エラークラス
+- FileOperationError: ファイル操作エラー
+- ValidationError: バリデーションエラー
+- ParseError: パース処理エラー
+- SecurityError: セキュリティ関連エラー
 
-2. ログフォーマット
-   ```
-   [LEVEL] [TIMESTAMP] [CONTEXT] Message
-   ```
-
-3. ログ出力制御
-   - 環境変数による制御
-     - DEBUG: デバッグログの有効化
-     - LOG_LEVEL: ログレベルの設定
-     - LOG_FORMAT: フォーマットの設定
-
-## データフロー
-
-### セキュリティチェックフロー
-1. パス正規化
-2. セキュリティチェック
-   - ディレクトリトラバーサルの検出
-   - シンボリックリンクの解決
-3. パスのサニタイズ
-4. エラー報告（必要な場合）
-
-### エラー処理フロー
-1. エラーの検出
-2. コンテキスト情報の収集
-3. エラーインスタンスの生成
-4. エラーのログ記録
-5. 適切なエラーメッセージの表示
-
-### ログ処理フロー
-1. ログレベルの確認
-2. コンテキスト情報の収集
-3. フォーマットの適用
-4. 出力
-
-## 実装の詳細
-
-### セキュリティ実装
-```typescript
-interface SecurityCheckOptions {
-  allowSymlinks: boolean;
-  maxSymlinkDepth: number;
-  allowedPaths: string[];
-}
-
-interface SecurityCheckResult {
-  isValid: boolean;
-  normalizedPath: string;
-  errors: string[];
-}
-```
-
-### エラー実装
-```typescript
-interface ErrorContext {
-  fileName?: string;
-  lineNumber?: number;
-  columnNumber?: number;
-  source?: string;
-}
-
-class DetailedError extends Error {
-  context: ErrorContext;
-  suggestions: string[];
-}
-```
-
-### ログ実装
-```typescript
-type LogLevel = "ERROR" | "WARN" | "INFO" | "DEBUG" | "TRACE";
-
-interface LogContext {
-  module: string;
-  function: string;
-  timestamp: Date;
-}
-
-interface LogOptions {
-  level: LogLevel;
-  format: string;
-  destination: "console" | "file";
-}
-```
+## ロギング
+複数レベルのログ出力をサポート:
+- ERROR: エラー情報
+- WARN: 警告情報
+- INFO: 一般情報
+- DEBUG: デバッグ情報
+- TRACE: 詳細なトレース情報
 
 ## テスト戦略
+1. ユニットテスト
+   - 各モジュールの機能を個別にテスト
+   - モックを使用して外部依存を分離
+2. 統合テスト
+   - 実際のファイルシステムを使用したテスト
+   - エラーケースの検証
 
-### セキュリティテスト
-- ディレクトリトラバーサル攻撃の検出
-- シンボリックリンクの処理
-- パスのサニタイズ
-
-### エラー処理テスト
-- 各種エラーケースの検証
-- エラーメッセージの正確性
-- コンテキスト情報の正確性
-
-### ログテスト
-- 各ログレベルの動作
-- フォーマットの正確性
-- 環境変数による制御
-
-## 設定項目
-```typescript
-interface Config {
-  security: {
-    allowSymlinks: boolean;
-    maxSymlinkDepth: number;
-    allowedPaths: string[];
-  };
-  logging: {
-    level: LogLevel;
-    format: string;
-    destination: string;
-  };
-  errors: {
-    showLineNumbers: boolean;
-    showSuggestions: boolean;
-  };
-}
-```
+## 今後の改善点
+1. パフォーマンス最適化
+   - 大規模ファイルの処理効率化
+   - メモリ使用量の最適化
+2. 機能拡張
+   - 対応フォーマットの追加
+   - バッチ処理機能
+3. セキュリティ強化
+   - ファイル内容の検証機能
+   - アクセス制御機能の追加
