@@ -1,6 +1,6 @@
 # File Processor
 
-ファイルの内容を特定のフォーマットで結合・展開するツールです。
+ChatGPT/Claudeなどのサービスで吐き出した特定のフォーマットのファイルの展開および、そのフォーマットに結合するツールです。
 
 ## 機能
 
@@ -10,18 +10,21 @@
 - dry-run対応
 - CLI対応
 
-## インストール
+## 依存パッケージのインストール
 
 ```bash
-npm install
+bun i
 ```
 
-必要な依存関係：
-- commander: CLIインターフェース用
-- clipboardy: クリップボード操作用
-- globby: ファイル検索用
-- TypeScript: 型システム
-- vitest: テスト用
+## コンパイル
+
+bunを使って1バイナリにコンパイルできます。
+
+```bash
+bun compile
+```
+
+dist/cfpにバイナリが出力されます。
 
 ## 使い方
 
@@ -31,13 +34,13 @@ npm install
 
 ```bash
 # 標準入力から読み込み、./outputに展開
-npx tsx src/cli.ts extract ./output
+bun src/cli.ts extract ./output
 
 # クリップボードから読み込み、./outputに展開
-npx tsx src/cli.ts extract ./output --clipboard
+bun src/cli.ts extract ./output --clipboard
 
 # dry-runモード（実際のファイル書き込みを行わない）
-npx tsx src/cli.ts extract ./output --dry-run
+bun src/cli.ts extract ./output --dry-run
 ```
 
 ### ファイルの結合（pack）
@@ -46,13 +49,13 @@ npx tsx src/cli.ts extract ./output --dry-run
 
 ```bash
 # ./srcのファイルを結合して標準出力に出力
-npx tsx src/cli.ts pack ./src
+bun src/cli.ts pack ./src
 
 # ./srcのファイルを結合してクリップボードに出力
-npx tsx src/cli.ts pack ./src --clipboard
+bun src/cli.ts pack ./src --clipboard
 
 # dry-runモード
-npx tsx src/cli.ts pack ./src --dry-run
+bun src/cli.ts pack ./src --dry-run
 ```
 
 ## ファイルフォーマット
@@ -60,42 +63,30 @@ npx tsx src/cli.ts pack ./src --dry-run
 結合されたファイルは以下のフォーマットになります：
 
 ```
-// ファイル1のパス
+// ./file1
 
-ファイル1の内容
+file1の内容
 
-// ファイル2のパス
+// ./file2
 
-ファイル2の内容
+file2の内容
 ```
+
+`// ./` で始まる相対パスのみをファイルとして認識します。
 
 ## 開発
 
 ### テストの実行
 
 ```bash
-npm test
+bun test
 ```
 
 ### ビルド
 
 ```bash
-npm run build
+bun build
 ```
-
-## 制限事項
-
-- 対象ファイルは `.ts` と `.js` のみ
-- `node_modules` ディレクトリは除外される
-- ファイル名の区切りとして使用される `// ` で始まる行は、ファイル内容として使用できない
-
-## エラーハンドリング
-
-以下の場合にエラーが発生します：
-
-- ファイルの読み書きに失敗した場合
-- 不正なフォーマットのファイルを展開しようとした場合
-- 存在しないディレクトリを指定した場合
 
 ## デバッグ
 
@@ -104,7 +95,3 @@ npm run build
 ## ライセンス
 
 MIT
-
----
-
-このツールに関する質問や問題がありましたら、Issueを作成してください。

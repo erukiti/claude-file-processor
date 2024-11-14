@@ -1,11 +1,12 @@
 {
-  "name": "file-processor",
+  "name": "claude-file-processor",
   "version": "1.0.0",
   "description": "File content processor for combining and extracting files",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
     "build": "bun build --format esm --out-dir dist",
+    "compile": "bun build ./src/cli.ts --compile --outfile dist/cfp",
     "test": "vitest",
     "start": "bun src/cli.ts"
   },

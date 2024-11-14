@@ -6,10 +6,12 @@ import type { ProcessOptions } from "./types";
 import { mkdir } from "node:fs/promises";
 import { AppError } from "./utils/errors";
 
-const program = new Command();
+const program = new Command()
+  .name("cfp")
+  .description("A utility for packing and extracting files")
+  .version("1.0.0");
 
 program
-  .version("1.0.0")
   .option("-d, --dry-run", "Perform a dry run")
   .option("-c, --clipboard", "Use clipboard for input/output");
 
